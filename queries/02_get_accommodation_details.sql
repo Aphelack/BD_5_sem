@@ -8,5 +8,5 @@ FROM homeflip.accommodations a
 JOIN homeflip.users u ON a.owner_id = u.id
 LEFT JOIN homeflip.accommodation_amenity aa ON a.id = aa.accommodation_id
 LEFT JOIN homeflip.amenities am ON aa.amenity_id = am.id
-WHERE a.id = 'd4188f49-8574-473b-82af-bacee3031c8d'  -- Замените на нужный UUID объекта
+WHERE a.id = 'b238574f-aa55-463d-9eda-7af979cd3b06'
 GROUP BY a.id, u.id;
