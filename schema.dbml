@@ -1,0 +1,190 @@
+// Use DBML to define your database structure
+// Docs: https://dbml.dbdiagram.io/docs
+
+Table countries {
+  id uuid [pk, default: `uuid_generate_v4()`]
+  name text [not null, unique]
+  iso_code text [unique]
+  created_at timestamp [default: `CURRENT_TIMESTAMP`]
+}
+
+Table amenities {
+  id uuid [pk, default: `uuid_generate_v4()`]
+  short_name text [not null, unique]
+}
+
+Table accommodation_statuses {
+  id uuid [pk, default: `uuid_generate_v4()`]
+  code text [not null, unique]
+  name text [not null]
+  description text
+  created_at timestamp [default: `CURRENT_TIMESTAMP`]
+}
+
+Table accommodation_types {
+  id uuid [pk, default: `uuid_generate_v4()`]
+  name text [not null, unique]
+  description text
+  created_at timestamp [default: `CURRENT_TIMESTAMP`]
+}
+
+Table exchange_offer_statuses {
+  id uuid [pk, default: `uuid_generate_v4()`]
+  code text [not null, unique]
+  name text [not null]
+  description text
+  created_at timestamp [default: `CURRENT_TIMESTAMP`]
+}
+
+Table roles {
+  id uuid [pk, default: `uuid_generate_v4()`]
+  name text [not null, unique]
+  description text [not null]
+  created_at timestamp [default: `CURRENT_TIMESTAMP`]
+}
+
+Table privileges {
+  id uuid [pk, default: `uuid_generate_v4()`]
+  name text [not null, unique]
+  description text [not null]
+  created_at timestamp [default: `CURRENT_TIMESTAMP`]
+}
+
+Table whitelist_emails {
+  id uuid [pk, default: `uuid_generate_v4()`]
+  email text [not null, unique]
+}
+
+Table cities {
+  id uuid [pk, default: `uuid_generate_v4()`]
+  name text [not null]
+  country_id uuid [not null]
+  region text
+  created_at timestamp [default: `CURRENT_TIMESTAMP`]
+}
+
+Table role_privileges {
+  role_id uuid [not null]
+  privilege_id uuid [not null]
+  created_at timestamp [default: `CURRENT_TIMESTAMP`]
+
+  indexes {
+    (role_id, privilege_id) [pk]
+  }
+}
+
+Table users {
+  id uuid [pk, default: `uuid_generate_v4()`]
+  yandex_id text [not null, unique]
+  email text [not null, unique]
+  first_name text [not null]
+  last_name text [not null]
+  phone_number text [not null]
+  created_at timestamp [default: `CURRENT_TIMESTAMP`]
+  has_approved_accommodation boolean [default: false]
+  role_id uuid
+}
+
+Table addresses {
+  id uuid [pk, default: `uuid_generate_v4()`]
+  street_address text [not null]
+  postal_code text
+  created_at timestamp [default: `CURRENT_TIMESTAMP`]
+  updated_at timestamp [default: `CURRENT_TIMESTAMP`]
+  city_id uuid [not null]
+}
+
+Table accommodations {
+  id uuid [pk, default: `uuid_generate_v4()`]
+  owner_id uuid [not null]
+  telegram text [not null]
+  description text [not null]
+  status_id uuid [not null]
+  address_id uuid [not null]
+}
+
+Table accommodation_details {
+  accommodation_id uuid [pk]
+  type_id uuid [not null]
+  floor integer
+  has_elevator boolean [default: false]
+  area_sqm integer
+  bedrooms integer
+  max_guests integer
+  pets_allowed boolean [default: false]
+  children_allowed boolean [default: true]
+  created_at timestamp [default: `CURRENT_TIMESTAMP`]
+  updated_at timestamp [default: `CURRENT_TIMESTAMP`]
+}
+
+Table accommodation_photos {
+  id uuid [pk, default: `uuid_generate_v4()`]
+  accommodation_id uuid [not null]
+  url text [not null]
+  is_primary boolean [default: false]
+}
+
+Table accommodation_amenity {
+  accommodation_id uuid [not null]
+  amenity_id uuid [not null]
+
+  indexes {
+    (accommodation_id, amenity_id) [pk]
+  }
+}
+
+Table accommodation_posted_periods {
+  id uuid [pk, default: `uuid_generate_v4()`]
+  accommodation_id uuid [not null]
+  start_date timestamp [not null]
+  end_date timestamp [not null]
+}
+
+Table exchange_offers {
+  id uuid [pk, default: `uuid_generate_v4()`]
+  target_accommodation_id uuid [not null]
+  from_user_id uuid [not null]
+  start_date timestamp [not null]
+  end_date timestamp [not null]
+  status_id uuid [not null]
+}
+
+Table accommodation_booked_periods {
+  id uuid [pk, default: `uuid_generate_v4()`]
+  accommodation_id uuid [not null]
+  exchange_offer_id uuid [not null]
+  start_date timestamp [not null]
+  end_date timestamp [not null]
+  is_valid_period boolean [default: false]
+}
+
+Table reviews_on_accommodations {
+  id uuid [pk, default: `uuid_generate_v4()`]
+  author_id uuid [not null]
+  accommodation_id uuid [not null]
+  comment text [not null]
+  rating integer [not null]
+}
+
+// Relationships
+Ref: cities.country_id > countries.id
+Ref: role_privileges.role_id > roles.id [delete: cascade]
+Ref: role_privileges.privilege_id > privileges.id [delete: cascade]
+Ref: users.role_id > roles.id
+Ref: addresses.city_id > cities.id
+Ref: accommodations.owner_id > users.id
+Ref: accommodations.status_id > accommodation_statuses.id
+Ref: accommodations.address_id > addresses.id
+Ref: accommodation_details.accommodation_id - accommodations.id [delete: cascade]
+Ref: accommodation_details.type_id > accommodation_types.id
+Ref: accommodation_photos.accommodation_id > accommodations.id
+Ref: accommodation_amenity.accommodation_id > accommodations.id
+Ref: accommodation_amenity.amenity_id > amenities.id
+Ref: accommodation_posted_periods.accommodation_id > accommodations.id
+Ref: exchange_offers.target_accommodation_id > accommodations.id
+Ref: exchange_offers.from_user_id > users.id
+Ref: exchange_offers.status_id > exchange_offer_statuses.id
+Ref: accommodation_booked_periods.accommodation_id > accommodations.id
+Ref: accommodation_booked_periods.exchange_offer_id > exchange_offers.id
+Ref: reviews_on_accommodations.author_id > users.id
+Ref: reviews_on_accommodations.accommodation_id > accommodations.id
