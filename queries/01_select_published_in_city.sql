@@ -13,4 +13,4 @@ JOIN homeflip.cities c ON addr.city_id = c.id
 JOIN homeflip.accommodation_details ad ON a.id = ad.accommodation_id
 JOIN homeflip.accommodation_types at ON ad.type_id = at.id
 JOIN homeflip.accommodation_statuses s ON a.status_id = s.id
-WHERE c.name = 'Moscow' AND s.code = 'published';
+WHERE c.name = 'Saint Petersburg' AND s.code = 'published';
