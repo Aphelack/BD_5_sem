@@ -1,6 +1,3 @@
--- Lab 4 — Дополнительные примеры (FILTER, AGGREGATION, EXISTS, WINDOW, UNION/EXCEPT, INSERT...SELECT)
--- Все примеры используют схему `homeflip` и соответствуют структуре из `migrations/01_init_schema.sql`.
-
 -- 1) Топ-5 пользователей по количеству опубликованных объектов
 -- (COUNT + JOIN + GROUP BY + ORDER BY)
 SELECT u.id AS user_id, u.email, COUNT(a.id) AS published_accommodations
@@ -38,7 +35,7 @@ WHERE EXISTS (
     SELECT 1
     FROM homeflip.accommodation_posted_periods p
     WHERE p.accommodation_id = a.id
-      AND p.start_date > CURRENT_DATE -- future posted period
+      AND p.start_date > CURRENT_DATE
 );
 
 -- 5) Ранжирование объектов по средней площади внутри каждого города (WINDOW + PARTITION)
@@ -116,7 +113,7 @@ WHERE NOT EXISTS (
 );
 
 -- 11) EXPLAIN: показать план выполнения для одного сложного запроса (пример)
-EXPLAIN ANALYZE
+EXPLAIN
 SELECT a.id, a.description, COALESCE(AVG(r.rating),0) AS avg_rating
 FROM homeflip.accommodations a
 LEFT JOIN homeflip.reviews_on_accommodations r ON r.accommodation_id = a.id
@@ -124,4 +121,7 @@ GROUP BY a.id, a.description
 ORDER BY avg_rating DESC
 LIMIT 10;
 
--- Конец: сохраните этот файл как `queries/lab4_05_more_examples.sql` и запустите выбранные запросы в вашей базе для проверки.
+
+select a.id, COUNT(eo.id) from accommodations a
+join exchange_offers eo on eo.target_accommodation_id = a.id
+group by a.id, eo.id
